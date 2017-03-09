@@ -1,4 +1,4 @@
-github "robbiehanson/CocoaAsyncSocket" "master"
+github "JayZhao/CocoaAsyncSocket" "master"
 github "CocoaLumberjack/CocoaLumberjack" "master"
 github "lexrus/MMDB-Swift" "master"
 github "zhuhaow/Sodium-framework" "master"
