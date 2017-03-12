@@ -144,6 +144,10 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
             return
         }
         
+        if let session = self.session, session.host.contains("smtp.mail.me.com") {
+            DDLogInfo("NWTCPSocket begin read")
+        }
+        
         connection!.readMinimumLength(1, maximumLength: Opt.MAXNWTCPSocketReadDataSize) { data, error in
             guard error == nil else {
                 DDLogError("NWTCPSocket<\(String(describing: self.session?.host)):\(String(describing: self.session?.port))> read failed: \(String(describing: error))")
@@ -170,6 +174,10 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
     public func readDataTo(length: Int) {
         guard !cancelled else {
             return
+        }
+        
+        if let session = self.session, session.host.contains("smtp.mail.me.com") {
+            DDLogInfo("NWTCPSocket begin readTo")
         }
         
         connection!.readLength(length) { data, error in
@@ -231,6 +239,11 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         
         if context == &NWTCPSocket.kKVOConnectionStatusContext && keyPath == "state" {
+            
+            if let session = self.session, session.host.contains("smtp.mail.me.com") {
+                DDLogInfo("NWTCPSocket connection state:\(connection?.state)")
+            }
+            
             switch connection!.state {
             case .connected:
                 queueCall {
