@@ -30,10 +30,12 @@ open class CCCrypto: StreamCryptoProtocol {
         }
     }
     
-    let cryptor: UnsafeMutablePointer<CCCryptorRef?>
+    let cryptor: CCCryptorRef
     
     public init(operation: CryptoOperation, mode: Mode, algorithm: Algorithm, initialVector: Data?, key: Data) {
-        let cryptor = UnsafeMutablePointer<CCCryptorRef?>.allocate(capacity: 1)
+        
+        let cryptor = UnsafeMutablePointer<CCCryptorRef?>.allocate(capacity: 1); defer {cryptor.deallocate(capacity: 1)}
+        
         _ = key.withUnsafeRawPointer { k in
             if let initialVector = initialVector {
                 _ = initialVector.withUnsafeRawPointer { iv in
@@ -43,7 +45,7 @@ open class CCCrypto: StreamCryptoProtocol {
                 CCCryptorCreateWithMode(operation.toCCOperation(), mode.toCCMode(), algorithm.toCCAlgorithm(), CCPadding(ccNoPadding), nil, k, key.count, nil, 0, 0, 0, cryptor)
             }
         }
-        self.cryptor = cryptor
+        self.cryptor = cryptor.pointee!
     }
     
     open func update( _ data: inout Data) {
@@ -53,8 +55,8 @@ open class CCCrypto: StreamCryptoProtocol {
     }
     
     deinit {
-        CCCryptorRelease(cryptor.pointee)
-        cryptor.deallocate(capacity: 1)
+        CCCryptorRelease(cryptor)
+        
     }
     
 }
