@@ -153,6 +153,10 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
                 return
             }
             
+            if let session = self.session, session.host.contains("smtp.mail.me.com") {
+                DDLogInfo("NWTCPSocket read:\(String(describing: data?.count)) bytes")
+            }
+            
             self.readCallback(data: data)
         }
     }
@@ -175,6 +179,10 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
                     self.disconnect()
                 }
                 return
+            }
+            
+            if let session = self.session, session.host.contains("smtp.mail.me.com") {
+                DDLogInfo("NWTCPSocket read:\(String(describing: data?.count)) bytes")
             }
             
             self.readCallback(data: data)
@@ -282,6 +290,9 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
     }
     
     private func send(data: Data) {
+        if let session = self.session, session.host.contains("smtp.mail.me.com") {
+            DDLogInfo("NWTCPSocket write:\(data.count) bytes")
+        }
         writePending = true
         self.connection!.write(data) { error in
             self.queueCall {
