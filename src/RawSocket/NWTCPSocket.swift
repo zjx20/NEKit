@@ -22,6 +22,9 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
     /// The `RawTCPSocketDelegate` instance.
     weak open var delegate: RawTCPSocketDelegate?
     
+    /// Only for debug purpose.
+    weak public var session: ConnectSession?
+    
     /// If the socket is connected.
     public var isConnected: Bool {
         return connection != nil && connection!.state == .connected
@@ -143,7 +146,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         
         connection!.readMinimumLength(1, maximumLength: Opt.MAXNWTCPSocketReadDataSize) { data, error in
             guard error == nil else {
-                DDLogError("NWTCPSocket<\(String(describing: self.connection?.remoteAddress))> got an error when reading data: \(String(describing: error))")
+                DDLogError("NWTCPSocket<\(String(describing: self.session?.host)):\(String(describing: self.session?.port))> read failed: \(String(describing: error))")
                 self.queueCall {
                     self.disconnect()
                 }
@@ -167,7 +170,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         
         connection!.readLength(length) { data, error in
             guard error == nil else {
-                DDLogError("NWTCPSocket<\(String(describing: self.connection?.remoteAddress))> got an error when reading data: \(String(describing: error))")
+                DDLogError("NWTCPSocket<\(String(describing: self.session?.host)):\(String(describing: self.session?.port))> read failed: \(String(describing: error))")
                 self.queueCall {
                     self.disconnect()
                 }
@@ -285,7 +288,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
                 self.writePending = false
                 
                 guard error == nil else {
-                    DDLogError("NWTCPSocket got an error when writing data: \(String(describing: error))")
+                    DDLogError("NWTCPSocket<\(String(describing: self.session?.host)):\(String(describing: self.session?.port))> write failed: \(String(describing: error))")
                     self.disconnect()
                     return
                 }

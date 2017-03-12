@@ -24,6 +24,9 @@ public protocol RawTCPSocketProtocol : class {
     /// The destination port.
     var destinationPort: Port? { get }
 
+    /// Only for debug purpose.
+    weak var session: ConnectSession? {get set}
+    
     /**
      Connect to remote host.
 
