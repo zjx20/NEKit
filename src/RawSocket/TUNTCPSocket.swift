@@ -5,6 +5,9 @@ import tun2socks
 ///
 /// - warning: This class is not thread-safe.
 public class TUNTCPSocket: RawTCPSocketProtocol, TSTCPSocketDelegate {
+    public /// Only for debug purpose.
+    weak var session: ConnectSession?
+
     fileprivate let tsSocket: TSTCPSocket
     fileprivate var reading = false
     fileprivate var pendingReadData: Data = Data()

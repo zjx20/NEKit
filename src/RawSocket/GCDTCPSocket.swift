@@ -5,6 +5,9 @@ import CocoaAsyncSocket
 ///
 /// - warning: This class is not thread-safe.
 open class GCDTCPSocket: NSObject, GCDAsyncSocketDelegate, RawTCPSocketProtocol {
+    public /// Only for debug purpose.
+    weak var session: ConnectSession?
+
     fileprivate let socket: GCDAsyncSocket
     fileprivate var enableTLS: Bool = false
 
