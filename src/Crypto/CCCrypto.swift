@@ -4,7 +4,7 @@ import CommonCrypto
 open class CCCrypto: StreamCryptoProtocol {
     public enum Algorithm {
         case aes, cast, rc4
-
+        
         public func toCCAlgorithm() -> CCAlgorithm {
             switch self {
             case .aes:
@@ -16,10 +16,10 @@ open class CCCrypto: StreamCryptoProtocol {
             }
         }
     }
-
+    
     public enum Mode {
         case cfb, rc4
-
+        
         public func toCCMode() -> CCMode {
             switch self {
             case .cfb:
@@ -29,9 +29,9 @@ open class CCCrypto: StreamCryptoProtocol {
             }
         }
     }
-
-    let cryptor: CCCryptorRef
-
+    
+    let cryptor: UnsafeMutablePointer<CCCryptorRef?>
+    
     public init(operation: CryptoOperation, mode: Mode, algorithm: Algorithm, initialVector: Data?, key: Data) {
         let cryptor = UnsafeMutablePointer<CCCryptorRef?>.allocate(capacity: 1)
         _ = key.withUnsafeRawPointer { k in
@@ -43,17 +43,18 @@ open class CCCrypto: StreamCryptoProtocol {
                 CCCryptorCreateWithMode(operation.toCCOperation(), mode.toCCMode(), algorithm.toCCAlgorithm(), CCPadding(ccNoPadding), nil, k, key.count, nil, 0, 0, 0, cryptor)
             }
         }
-        self.cryptor = cryptor.pointee!
+        self.cryptor = cryptor
     }
-
+    
     open func update( _ data: inout Data) {
         _ = data.withUnsafeMutableBytes {
-            CCCryptorUpdate(cryptor, $0, data.count, $0, data.count, nil)
+            CCCryptorUpdate(cryptor.pointee, $0, data.count, $0, data.count, nil)
         }
     }
-
+    
     deinit {
-        CCCryptorRelease(cryptor)
+        CCCryptorRelease(cryptor.pointee)
+        cryptor.deallocate(capacity: 1)
     }
-
+    
 }
