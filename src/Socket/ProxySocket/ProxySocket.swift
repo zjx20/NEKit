@@ -14,7 +14,7 @@ open class ProxySocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
 
     open override var description: String {
         if let session = session {
-            return "<\(typeName) host:\(session.host) port: \(session.port))>"
+            return "<\(typeName) host:\(session.host) port:\(session.port))>"
         } else {
             return "<\(typeName)>"
         }

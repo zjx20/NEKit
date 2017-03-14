@@ -64,6 +64,9 @@ public class ShadowsocksAdapter: AdapterSocket {
         internalStatus = .connected
 
         protocolObfuscater.start()
+        
+        /// Trigger sending the ss header.
+        write(data: Data())
     }
 
     override public func didRead(data: Data, from socket: RawTCPSocketProtocol) {
