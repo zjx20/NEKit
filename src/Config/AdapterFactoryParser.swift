@@ -1,9 +1,9 @@
 import Foundation
-import Yaml
+import SwiftyJSON
 
 struct AdapterFactoryParser {
     // swiftlint:disable:next cyclomatic_complexity
-    static func parseAdapterFactoryManager(_ config: Yaml) throws -> AdapterFactoryManager {
+    static func parseAdapterFactoryManager(_ config: JSON) throws -> AdapterFactoryManager {
         var factoryDict: [String: AdapterFactory] = [:]
         factoryDict["direct"] = DirectAdapterFactory()
         guard let adapterConfigs = config.array else {
@@ -11,7 +11,7 @@ struct AdapterFactoryParser {
         }
 
         for adapterConfig in adapterConfigs {
-            guard let id = adapterConfig["id"].stringOrIntString else {
+            guard let id = adapterConfig["id"].string else {
                 throw ConfigurationParserError.adapterIDMissing
             }
 
@@ -38,7 +38,7 @@ struct AdapterFactoryParser {
         return AdapterFactoryManager(factoryDict: factoryDict)
     }
 
-    static func parseServerAdapterFactory(_ config: Yaml, type: HTTPAuthenticationAdapterFactory.Type) throws -> ServerAdapterFactory {
+    static func parseServerAdapterFactory(_ config: JSON, type: HTTPAuthenticationAdapterFactory.Type) throws -> ServerAdapterFactory {
         guard let host = config["host"].string else {
             throw ConfigurationParserError.adapterParsingError(errorInfo: "Host (host) is required.")
         }
@@ -50,10 +50,10 @@ struct AdapterFactoryParser {
         var authentication: HTTPAuthentication? = nil
         if let auth = config["auth"].bool {
             if auth {
-                guard let username = config["username"].stringOrIntString else {
+                guard let username = config["username"].string else {
                     throw ConfigurationParserError.adapterParsingError(errorInfo: "Username (username) is required.")
                 }
-                guard let password = config["password"].stringOrIntString else {
+                guard let password = config["password"].string else {
                     throw ConfigurationParserError.adapterParsingError(errorInfo: "Password (password) is required.")
                 }
                 authentication = HTTPAuthentication(username: username, password: password)
@@ -62,7 +62,7 @@ struct AdapterFactoryParser {
         return type.init(serverHost: host, serverPort: port, auth: authentication)
     }
 
-    static func parseSOCKS5AdapterFactory(_ config: Yaml) throws -> SOCKS5AdapterFactory {
+    static func parseSOCKS5AdapterFactory(_ config: JSON) throws -> SOCKS5AdapterFactory {
         guard let host = config["host"].string else {
             throw ConfigurationParserError.adapterParsingError(errorInfo: "Host (host) is required.")
         }
@@ -74,7 +74,7 @@ struct AdapterFactoryParser {
         return SOCKS5AdapterFactory(serverHost: host, serverPort: port)
     }
 
-    static func parseShadowsocksAdapterFactory(_ config: Yaml) throws -> ShadowsocksAdapterFactory {
+    static func parseShadowsocksAdapterFactory(_ config: JSON) throws -> ShadowsocksAdapterFactory {
         guard let host = config["host"].string else {
             throw ConfigurationParserError.adapterParsingError(errorInfo: "Host (host) is required.")
         }
@@ -91,7 +91,7 @@ struct AdapterFactoryParser {
             throw ConfigurationParserError.adapterParsingError(errorInfo: "Encryption method \(encryptMethod) is not supported.")
         }
 
-        guard let password = config["password"].stringOrIntString else {
+        guard let password = config["password"].string else {
             throw ConfigurationParserError.adapterParsingError(errorInfo: "Password (password) is required.")
         }
 
@@ -149,7 +149,7 @@ struct AdapterFactoryParser {
         return ShadowsocksAdapterFactory(serverHost: host, serverPort: port, protocolObfuscaterFactory: protocolObfuscaterFactory, cryptorFactory: cryptoFactory, streamObfuscaterFactory: streamObfuscaterFactory)
     }
 
-    static func parseSpeedAdapterFactory(_ config: Yaml, factoryDict: [String:AdapterFactory]) throws -> SpeedAdapterFactory {
+    static func parseSpeedAdapterFactory(_ config: JSON, factoryDict: [String:AdapterFactory]) throws -> SpeedAdapterFactory {
         var factories: [(AdapterFactory, Int)] = []
         guard let adapters = config["adapters"].array else {
             throw ConfigurationParserError.adapterParsingError(errorInfo: "Speed Adatper should specify a set of adapters (adapters).")
@@ -172,7 +172,7 @@ struct AdapterFactoryParser {
         return adapter
     }
 
-    static func parseRejectAdapterFactory(_ config: Yaml) throws -> RejectAdapterFactory {
+    static func parseRejectAdapterFactory(_ config: JSON) throws -> RejectAdapterFactory {
 
         guard let delay = config["delay"].int else {
             throw ConfigurationParserError.adapterParsingError(errorInfo: "Reject adapter must specify a delay in millisecond.")
