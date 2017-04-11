@@ -1,5 +1,4 @@
 import Foundation
-import CocoaLumberjackSwift
 
 extension ShadowsocksAdapter {
     public class CryptoStreamProcessor {
@@ -53,15 +52,7 @@ extension ShadowsocksAdapter {
         }
 
         func encrypt(data: inout Data) {
-            
-            let before = data.count
-            encryptor.update(&data)
-            let after = data.count
-            
-            let delta:Double = Double(after - before)
-            let ratio = delta/Double(before)*100.0
-            
-            DDLogDebug("Encrypt:[+\(ratio)%], \(before) -> \(after)")
+            return encryptor.update(&data)
         }
 
         func decrypt(data: inout Data) {
