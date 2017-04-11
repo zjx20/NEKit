@@ -55,16 +55,13 @@ extension ShadowsocksAdapter {
         func encrypt(data: inout Data) {
             
             let before = data.count
-            let result = encryptor.update(&data)
+            encryptor.update(&data)
             let after = data.count
             
-            let delta:Double = after - before
+            let delta:Double = Double(after - before)
             let ratio = delta/Double(before)*100.0
             
-            DDLogDebug("Encrypt:[+%@%], %@ -> %@", NSNumber(value: ratio), NSNumber(value: before), NSNumber(value: after))
-            
-            return result
-            
+            DDLogDebug("Encrypt:[+\(ratio)%], \(before) -> \(after)")
         }
 
         func decrypt(data: inout Data) {
