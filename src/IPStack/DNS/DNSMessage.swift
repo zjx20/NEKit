@@ -55,55 +55,58 @@ open class DNSMessage {
         self.payload = payload
         let scanner = BinaryDataScanner(data: payload, littleEndian: false)
 
-        transactionID = scanner.read16()!
-
-        var bytes = scanner.readByte()!
-        if bytes & 0x80 > 0 {
-            messageType = .response
-        } else {
-            messageType = .query
+        do {
+            transactionID = try scanner.read16()
+            
+            var bytes = try scanner.readByte()
+            if bytes & 0x80 > 0 {
+                messageType = .response
+            } else {
+                messageType = .query
+            }
+            
+            // ignore OP code
+            
+            authoritative = bytes & 0x04 > 0
+            truncation = bytes & 0x02 > 0
+            recursionDesired = bytes & 0x01 > 0
+            
+            bytes = try scanner.readByte()
+            recursionAvailable = bytes & 0x80 > 0
+            if let status = DNSReturnStatus(rawValue: bytes & 0x0F) {
+                self.status = status
+            } else {
+                DDLogError("Received DNS response with unknown status: \(bytes & 0x0F).")
+                self.status = .serverFailure
+            }
+            
+            let queryCount = try scanner.read16()
+            let answerCount = try scanner.read16()
+            let nameserverCount = try scanner.read16()
+            let addtionalCount = try scanner.read16()
+            
+            for _ in 0..<queryCount {
+                queries.append(DNSQuery(payload: payload, offset: scanner.position, base: 0)!)
+                scanner.advance(by: queries.last!.bytesLength)
+            }
+            
+            for _ in 0..<answerCount {
+                answers.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
+                scanner.advance(by: answers.last!.bytesLength)
+            }
+            
+            for _ in 0..<nameserverCount {
+                nameservers.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
+                scanner.advance(by: nameservers.last!.bytesLength)
+            }
+            
+            for _ in 0..<addtionalCount {
+                addtionals.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
+                scanner.advance(by: addtionals.last!.bytesLength)
+            }
+        } catch _ {
+            return nil
         }
-
-        // ignore OP code
-
-        authoritative = bytes & 0x04 > 0
-        truncation = bytes & 0x02 > 0
-        recursionDesired = bytes & 0x01 > 0
-
-        bytes = scanner.readByte()!
-        recursionAvailable = bytes & 0x80 > 0
-        if let status = DNSReturnStatus(rawValue: bytes & 0x0F) {
-            self.status = status
-        } else {
-            DDLogError("Received DNS response with unknown status: \(bytes & 0x0F).")
-            self.status = .serverFailure
-        }
-
-        let queryCount = scanner.read16()!
-        let answerCount = scanner.read16()!
-        let nameserverCount = scanner.read16()!
-        let addtionalCount = scanner.read16()!
-
-        for _ in 0..<queryCount {
-            queries.append(DNSQuery(payload: payload, offset: scanner.position, base: 0)!)
-            scanner.advance(by: queries.last!.bytesLength)
-        }
-
-        for _ in 0..<answerCount {
-            answers.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
-            scanner.advance(by: answers.last!.bytesLength)
-        }
-
-        for _ in 0..<nameserverCount {
-            nameservers.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
-            scanner.advance(by: nameservers.last!.bytesLength)
-        }
-
-        for _ in 0..<addtionalCount {
-            addtionals.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
-            scanner.advance(by: addtionals.last!.bytesLength)
-        }
-
     }
 
     func buildMessage() -> Bool {
@@ -247,18 +250,23 @@ open class DNSQuery {
         let scanner = BinaryDataScanner(data: payload, littleEndian: false)
         scanner.skip(to: offset + self.nameBytesLength)
 
-        guard let type = DNSType(rawValue: scanner.read16()!) else {
-            DDLogError("Received DNS packet with unknown type.")
+        do {
+            
+            guard let type = DNSType(rawValue: try scanner.read16()) else {
+                DDLogError("Received DNS packet with unknown type.")
+                return nil
+            }
+            self.type = type
+            
+            guard let klass = DNSClass(rawValue: try scanner.read16()) else {
+                DDLogError("Received DNS packet with unknown class.")
+                return nil
+            }
+            self.klass = klass
+            
+        } catch _ {
             return nil
         }
-        self.type = type
-
-        guard let klass = DNSClass(rawValue: scanner.read16()!) else {
-            DDLogError("Received DNS packet with unknown class.")
-            return nil
-        }
-        self.klass = klass
-
     }
 
     var bytesLength: Int {
@@ -295,21 +303,26 @@ open class DNSResource {
 
         let scanner = BinaryDataScanner(data: payload, littleEndian: false)
         scanner.skip(to: offset + self.nameBytesLength)
-
-        guard let type = DNSType(rawValue: scanner.read16()!) else {
-            DDLogError("Received DNS packet with unknown type.")
+        
+        do {
+            
+            guard let type = DNSType(rawValue: try scanner.read16()) else {
+                DDLogError("Received DNS packet with unknown type.")
+                return nil
+            }
+            self.type = type
+            
+            guard let klass = DNSClass(rawValue: try scanner.read16()) else {
+                DDLogError("Received DNS packet with unknown class.")
+                return nil
+            }
+            self.klass = klass
+            self.TTL = try scanner.read32()
+            dataLength = try scanner.read16()
+            self.data = payload.subdata(in: scanner.position..<scanner.position+Int(dataLength))
+        } catch _ {
             return nil
         }
-        self.type = type
-
-        guard let klass = DNSClass(rawValue: scanner.read16()!) else {
-            DDLogError("Received DNS packet with unknown class.")
-            return nil
-        }
-        self.klass = klass
-        self.TTL = scanner.read32()!
-        dataLength = scanner.read16()!
-        self.data = payload.subdata(in: scanner.position..<scanner.position+Int(dataLength))
     }
 
     var bytesLength: Int {
@@ -358,8 +371,9 @@ class DNSNameConverter {
         var currentReadBytes = 0
         var jumped = false
         var nameBytesLength = 0
+        
         repeat {
-            let length = scanner.read16()!
+            let length = (try? scanner.read16()) ?? 0
             // is this a pointer?
             if length & 0xC000 == 0xC000 {
                 if !jumped {
@@ -372,7 +386,7 @@ class DNSNameConverter {
                 scanner.advance(by: -2)
             }
 
-            len = scanner.readByte()!
+            len = (try? scanner.readByte()) ?? 0
             currentReadBytes += 1
             if len == 0 {
                 break

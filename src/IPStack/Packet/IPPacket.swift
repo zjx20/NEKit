@@ -192,57 +192,62 @@ open class IPPacket {
         self.packetData = packetData
 
         let scanner = BinaryDataScanner(data: packetData, littleEndian: false)
-
-        let vhl = scanner.readByte()!
-        guard let v = IPVersion(rawValue: vhl >> 4) else {
-            DDLogError("Got unknown ip packet version \(vhl >> 4)")
-            return nil
-        }
-        version = v
-        headerLength = vhl & 0x0F * 4
-
-        guard packetData.count >= Int(headerLength) else {
-            return nil
-        }
-
-        tos = scanner.readByte()!
-
-        guard totalLength == scanner.read16()! else {
-            DDLogError("Packet length mismatches from header.")
-            return nil
-        }
-
-        identification = scanner.read16()!
-        offset = scanner.read16()!
-        TTL = scanner.readByte()!
-
-        guard let proto = TransportProtocol(rawValue: scanner.readByte()!) else {
-            DDLogWarn("Get unsupported packet protocol.")
-            return nil
-        }
-        transportProtocol = proto
-
-        // ignore checksum
-        _ = scanner.read16()!
-
-        switch version {
-        case .iPv4:
-            sourceAddress = IPAddress(ipv4InNetworkOrder: CFSwapInt32(scanner.read32()!))
-            destinationAddress = IPAddress(ipv4InNetworkOrder: CFSwapInt32(scanner.read32()!))
-        default:
-            // IPv6 is not supported yet.
-            DDLogWarn("IPv6 is not supported yet.")
-            return nil
-        }
-
-        switch transportProtocol! {
-        case .udp:
-            guard let parser = UDPProtocolParser(packetData: packetData, offset: Int(headerLength)) else {
+        
+        do {
+            let vhl = try scanner.readByte()
+            guard let v = IPVersion(rawValue: vhl >> 4) else {
+                DDLogError("Got unknown ip packet version \(vhl >> 4)")
                 return nil
             }
-            self.protocolParser = parser
-        default:
-            DDLogError("Can not parse packet header of type \(transportProtocol) yet")
+            version = v
+            headerLength = vhl & 0x0F * 4
+            
+            guard packetData.count >= Int(headerLength) else {
+                return nil
+            }
+            
+            tos = try scanner.readByte()
+            
+            let twoBytes = try scanner.read16()
+            guard totalLength == twoBytes else {
+                DDLogError("Packet length mismatches from header.")
+                return nil
+            }
+            
+            identification = try scanner.read16()
+            offset = try scanner.read16()
+            TTL = try scanner.readByte()
+            
+            guard let proto = TransportProtocol(rawValue: try scanner.readByte()) else {
+                DDLogWarn("Get unsupported packet protocol.")
+                return nil
+            }
+            transportProtocol = proto
+            
+            // ignore checksum
+            _ = try scanner.read16()
+            
+            switch version {
+            case .iPv4:
+                sourceAddress = IPAddress(ipv4InNetworkOrder: CFSwapInt32(try scanner.read32()))
+                destinationAddress = IPAddress(ipv4InNetworkOrder: CFSwapInt32(try scanner.read32()))
+            default:
+                // IPv6 is not supported yet.
+                DDLogWarn("IPv6 is not supported yet.")
+                return nil
+            }
+            
+            switch transportProtocol! {
+            case .udp:
+                guard let parser = UDPProtocolParser(packetData: packetData, offset: Int(headerLength)) else {
+                    return nil
+                }
+                self.protocolParser = parser
+            default:
+                DDLogError("Can not parse packet header of type \(transportProtocol) yet")
+                return nil
+            }
+        } catch _ {
             return nil
         }
     }

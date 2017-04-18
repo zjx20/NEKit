@@ -20,7 +20,7 @@ open class Checksum {
             end = data.count
         }
         while scanner.position + 2 <= end! {
-            let value = scanner.read16()!
+            let value = (try? scanner.read16()) ?? 0
             result += UInt32(value)
         }
 
@@ -28,7 +28,7 @@ open class Checksum {
             // data is of odd size
             // Intel and ARM are both litten endian
             // so just add it
-            let value = scanner.readByte()!
+            let value = (try? scanner.readByte()) ?? 0
             result += UInt32(value)
         }
         return result

@@ -36,6 +36,10 @@ extension UInt32: BinaryReadable {}
 
 extension UInt64: BinaryReadable {}
 
+enum BinaryDataError: Error {
+    case outOfBound
+}
+
 open class BinaryDataScanner {
     let data: Data
     let littleEndian: Bool
@@ -52,9 +56,9 @@ open class BinaryDataScanner {
         self.littleEndian = littleEndian
     }
 
-    open func read<T: BinaryReadable>() -> T? {
+    open func read<T: BinaryReadable>() throws -> T {
         if remaining < MemoryLayout<T>.size {
-            return nil
+            throw BinaryDataError.outOfBound
         }
 
         let v = data.withUnsafeRawPointer {
@@ -75,19 +79,19 @@ open class BinaryDataScanner {
 
     /* convenience read funcs */
 
-    open func readByte() -> UInt8? {
-        return read()
+    open func readByte() throws -> UInt8 {
+        return try read()
     }
 
-    open func read16() -> UInt16? {
-        return read()
+    open func read16() throws -> UInt16 {
+        return try read()
     }
 
-    open func read32() -> UInt32? {
-        return read()
+    open func read32() throws -> UInt32 {
+        return try read()
     }
 
-    open func read64() -> UInt64? {
-        return read()
+    open func read64() throws -> UInt64 {
+        return try read()
     }
 }
