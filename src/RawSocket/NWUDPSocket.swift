@@ -102,15 +102,19 @@ public class NWUDPSocket: NSObject {
             return
         }
         
-        switch session.state {
-        case .cancelled:
-            queueCall {
-                self.delegate?.didCancel(socket: self)
+        // http://inessential.com/2013/12/20/observers_and_thread_safety
+        QueueFactory.getQueue().async { [weak self] in
+            
+            if let strongSelf = self {
+                switch strongSelf.session.state {
+                case .cancelled:
+                    strongSelf.delegate?.didCancel(socket: strongSelf)
+                case .ready:
+                    strongSelf.checkWrite()
+                default:
+                    break
+                }
             }
-        case .ready:
-            checkWrite()
-        default:
-            break
         }
     }
     
