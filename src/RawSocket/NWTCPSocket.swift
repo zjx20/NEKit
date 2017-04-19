@@ -81,7 +81,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         }
         
         self.connection = connection
-        connection.addObserver(self, forKeyPath: "state", options: [.initial, .new], context: &NWTCPSocket.kKVOConnectionStatusContext)
+        self.kvoController.observe(connection, keyPath: "state", options: [.initial, .new], context: &NWTCPSocket.kKVOConnectionStatusContext)
     }
     
     /**
@@ -226,8 +226,6 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
     
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         
-        // We have to enclosure it with the same queue where self.deinit gets called.
-        // http://inessential.com/2013/12/20/observers_and_thread_safety
         QueueFactory.getQueue().async {[weak self] in
             
             if context == &NWTCPSocket.kKVOConnectionStatusContext && keyPath == "state" {
@@ -251,13 +249,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
                     }
                 }
             }
-            else {
-                // Although not calling super.observeValue violates the standard KVO usage pattern, but `super` can not be used in a closure where self is explicitly captured (Swift3)
-                //super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-            }
         }
-        
-        
     }
     
     private func readCallback(data: Data?) {
