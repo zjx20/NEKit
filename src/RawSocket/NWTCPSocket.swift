@@ -1,6 +1,7 @@
 import Foundation
 import NetworkExtension
 import CocoaLumberjackSwift
+import KVOController
 
 /// The TCP socket build upon `NWTCPConnection`.
 ///

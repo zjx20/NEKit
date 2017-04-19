@@ -290,22 +290,6 @@
 		36E9CD001DD6EEF5003597CE /* QueueFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E9CCFE1DD6EEF5003597CE /* QueueFactory.swift */; };
 		36E9CD041DD6F0DE003597CE /* Resolver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 360F392B1DD2068E002BED59 /* Resolver.framework */; };
 		36E9CD051DD6F0DE003597CE /* Resolver.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 360F392B1DD2068E002BED59 /* Resolver.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		3BCE7DED1EA7CA51003FF278 /* FBKVOController.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BCE7DE81EA7CA51003FF278 /* FBKVOController.h */; };
-		3BCE7DEE1EA7CA51003FF278 /* FBKVOController.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BCE7DE81EA7CA51003FF278 /* FBKVOController.h */; };
-		3BCE7DEF1EA7CA51003FF278 /* FBKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BCE7DE91EA7CA51003FF278 /* FBKVOController.m */; };
-		3BCE7DF01EA7CA51003FF278 /* FBKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BCE7DE91EA7CA51003FF278 /* FBKVOController.m */; };
-		3BCE7DF11EA7CA51003FF278 /* FBKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BCE7DE91EA7CA51003FF278 /* FBKVOController.m */; };
-		3BCE7DF21EA7CA51003FF278 /* FBKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BCE7DE91EA7CA51003FF278 /* FBKVOController.m */; };
-		3BCE7DF31EA7CA51003FF278 /* FBKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BCE7DE91EA7CA51003FF278 /* FBKVOController.m */; };
-		3BCE7DF41EA7CA51003FF278 /* KVOController.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BCE7DEA1EA7CA51003FF278 /* KVOController.h */; };
-		3BCE7DF51EA7CA51003FF278 /* KVOController.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BCE7DEA1EA7CA51003FF278 /* KVOController.h */; };
-		3BCE7DF61EA7CA51003FF278 /* NSObject+FBKVOController.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BCE7DEB1EA7CA51003FF278 /* NSObject+FBKVOController.h */; };
-		3BCE7DF71EA7CA51003FF278 /* NSObject+FBKVOController.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BCE7DEB1EA7CA51003FF278 /* NSObject+FBKVOController.h */; };
-		3BCE7DF81EA7CA51003FF278 /* NSObject+FBKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BCE7DEC1EA7CA51003FF278 /* NSObject+FBKVOController.m */; };
-		3BCE7DF91EA7CA51003FF278 /* NSObject+FBKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BCE7DEC1EA7CA51003FF278 /* NSObject+FBKVOController.m */; };
-		3BCE7DFA1EA7CA51003FF278 /* NSObject+FBKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BCE7DEC1EA7CA51003FF278 /* NSObject+FBKVOController.m */; };
-		3BCE7DFB1EA7CA51003FF278 /* NSObject+FBKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BCE7DEC1EA7CA51003FF278 /* NSObject+FBKVOController.m */; };
-		3BCE7DFC1EA7CA51003FF278 /* NSObject+FBKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BCE7DEC1EA7CA51003FF278 /* NSObject+FBKVOController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -574,12 +558,6 @@
 		36DB3CEE1E0D610500D907DB /* IPAddressSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPAddressSpec.swift; sourceTree = "<group>"; };
 		36E44A011CF2ED4800185DBF /* TUNInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TUNInterface.swift; sourceTree = "<group>"; };
 		36E9CCFE1DD6EEF5003597CE /* QueueFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QueueFactory.swift; path = Tunnel/QueueFactory.swift; sourceTree = "<group>"; };
-		3BCE7DE81EA7CA51003FF278 /* FBKVOController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBKVOController.h; sourceTree = "<group>"; };
-		3BCE7DE91EA7CA51003FF278 /* FBKVOController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBKVOController.m; sourceTree = "<group>"; };
-		3BCE7DEA1EA7CA51003FF278 /* KVOController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KVOController.h; sourceTree = "<group>"; };
-		3BCE7DEB1EA7CA51003FF278 /* NSObject+FBKVOController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+FBKVOController.h"; sourceTree = "<group>"; };
-		3BCE7DEC1EA7CA51003FF278 /* NSObject+FBKVOController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+FBKVOController.m"; sourceTree = "<group>"; };
-		3BCE7DFD1EA7CC00003FF278 /* NEKit-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NEKit-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -754,7 +732,6 @@
 		36463A261CDCD5EB0040579C = {
 			isa = PBXGroup;
 			children = (
-				3BCE7DFD1EA7CC00003FF278 /* NEKit-Bridging-Header.h */,
 				360F392A1DD2068D002BED59 /* Frameworks */,
 				36C48D4E1CF88DED0071804F /* NEKit-iOS */,
 				368225B91D12484D00E7B495 /* NEKit-macOS */,
@@ -911,11 +888,6 @@
 		36B162121CDDA0EA00F24C97 /* RawSocket */ = {
 			isa = PBXGroup;
 			children = (
-				3BCE7DE81EA7CA51003FF278 /* FBKVOController.h */,
-				3BCE7DE91EA7CA51003FF278 /* FBKVOController.m */,
-				3BCE7DEA1EA7CA51003FF278 /* KVOController.h */,
-				3BCE7DEB1EA7CA51003FF278 /* NSObject+FBKVOController.h */,
-				3BCE7DEC1EA7CA51003FF278 /* NSObject+FBKVOController.m */,
 				36B162181CDDA0EA00F24C97 /* GCDTCPSocket.swift */,
 				36B1621A1CDDA0EA00F24C97 /* NWTCPSocket.swift */,
 				36C63DF51CFFDCAF00A00CA2 /* NWUDPSocket.swift */,
@@ -1128,9 +1100,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				36463A341CDCD5EB0040579C /* NEKit.h in Headers */,
-				3BCE7DED1EA7CA51003FF278 /* FBKVOController.h in Headers */,
-				3BCE7DF41EA7CA51003FF278 /* KVOController.h in Headers */,
-				3BCE7DF61EA7CA51003FF278 /* NSObject+FBKVOController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1139,9 +1108,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				36C48D501CF88DED0071804F /* NEKit-iOS.h in Headers */,
-				3BCE7DEE1EA7CA51003FF278 /* FBKVOController.h in Headers */,
-				3BCE7DF51EA7CA51003FF278 /* KVOController.h in Headers */,
-				3BCE7DF71EA7CA51003FF278 /* NSObject+FBKVOController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1420,8 +1386,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3BCE7DF21EA7CA51003FF278 /* FBKVOController.m in Sources */,
-				3BCE7DFB1EA7CA51003FF278 /* NSObject+FBKVOController.m in Sources */,
 				36D400801E07E8A100583102 /* HTTPURLSpec.swift in Sources */,
 				36DB3CEF1E0D610500D907DB /* IPAddressSpec.swift in Sources */,
 				362347401D7E706300A047DE /* IPRangeSpec.swift in Sources */,
@@ -1432,8 +1396,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3BCE7DF31EA7CA51003FF278 /* FBKVOController.m in Sources */,
-				3BCE7DFC1EA7CA51003FF278 /* NSObject+FBKVOController.m in Sources */,
 				36D400811E07E8A100583102 /* HTTPURLSpec.swift in Sources */,
 				36DB3CF01E0D610500D907DB /* IPAddressSpec.swift in Sources */,
 				362347411D7E706300A047DE /* IPRangeSpec.swift in Sources */,
@@ -1450,7 +1412,6 @@
 				36CB0D381D51E06700DB7AF5 /* HTTPHeader.swift in Sources */,
 				3621B9491DFA92480003ABB3 /* GlobalIntializer.swift in Sources */,
 				361176601E00305500A1A058 /* StreamObfuscater.swift in Sources */,
-				3BCE7DF81EA7CA51003FF278 /* NSObject+FBKVOController.m in Sources */,
 				36C63DCB1CFD602500A00CA2 /* DNSSession.swift in Sources */,
 				36411A701D1ACD27005F4108 /* DNSResolver.swift in Sources */,
 				366EB5B71CDE150C00E0E942 /* HTTPAdapterFactory.swift in Sources */,
@@ -1469,7 +1430,6 @@
 				36411A801D214D32005F4108 /* PacketProtocolParser.swift in Sources */,
 				36B8936E1E17F97600881890 /* ResponseGenerator.swift in Sources */,
 				366EB5B91CDE150C00E0E942 /* ServerAdapterFactory.swift in Sources */,
-				3BCE7DEF1EA7CA51003FF278 /* FBKVOController.m in Sources */,
 				36C63DF91D001FDA00A00CA2 /* IPPacket.swift in Sources */,
 				36C48DAC1CF9D6580071804F /* DNSEnums.swift in Sources */,
 				3664F0C01CE30957008BA6D8 /* StreamScanner.swift in Sources */,
@@ -1556,8 +1516,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3BCE7DFA1EA7CA51003FF278 /* NSObject+FBKVOController.m in Sources */,
-				3BCE7DF11EA7CA51003FF278 /* FBKVOController.m in Sources */,
 				36A7199B1D5EEB4900DC35F5 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1572,7 +1530,6 @@
 				36CB0D391D51E06700DB7AF5 /* HTTPHeader.swift in Sources */,
 				3621B94A1DFA92480003ABB3 /* GlobalIntializer.swift in Sources */,
 				361176611E00305500A1A058 /* StreamObfuscater.swift in Sources */,
-				3BCE7DF91EA7CA51003FF278 /* NSObject+FBKVOController.m in Sources */,
 				36C63DCC1CFD602500A00CA2 /* DNSSession.swift in Sources */,
 				36411A711D1ACD27005F4108 /* DNSResolver.swift in Sources */,
 				36C48D5C1CF88EB60071804F /* ServerAdapterFactory.swift in Sources */,
@@ -1591,7 +1548,6 @@
 				36411A811D214D32005F4108 /* PacketProtocolParser.swift in Sources */,
 				36B8936F1E17F97600881890 /* ResponseGenerator.swift in Sources */,
 				36C48D571CF88EB60071804F /* AdapterFactory.swift in Sources */,
-				3BCE7DF01EA7CA51003FF278 /* FBKVOController.m in Sources */,
 				36C63DFA1D001FDA00A00CA2 /* IPPacket.swift in Sources */,
 				36C48DAD1CF9D6580071804F /* DNSEnums.swift in Sources */,
 				36C48D661CF88EBC0071804F /* Configuration.swift in Sources */,
@@ -1721,7 +1677,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = me.zhuhaow.NEKit.Test;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "NEKit-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
@@ -1741,7 +1696,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = me.zhuhaow.NEKit.Test;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "NEKit-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
@@ -1762,7 +1716,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = me.zhuhaow.NEKit.Test;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_OBJC_BRIDGING_HEADER = "NEKit-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
@@ -1784,7 +1737,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = me.zhuhaow.NEKit.Test;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_OBJC_BRIDGING_HEADER = "NEKit-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -1938,7 +1890,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = me.zhuhaow.NEKit;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "NEKit-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
@@ -1968,7 +1919,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = me.zhuhaow.NEKit;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "NEKit-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
@@ -1989,7 +1939,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = me.zhuhaow.osx.NEKitDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "NEKit-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
@@ -2011,7 +1960,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = me.zhuhaow.osx.NEKitDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "NEKit-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
@@ -2044,7 +1992,6 @@
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "NEKit-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -2076,7 +2023,6 @@
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "NEKit-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;

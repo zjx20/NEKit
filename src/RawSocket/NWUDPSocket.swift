@@ -1,6 +1,7 @@
 import Foundation
 import NetworkExtension
 import CocoaLumberjackSwift
+import KVOController
 
 /// The delegate protocol of `NWUDPSocket`.
 public protocol NWUDPSocketDelegate: class {
@@ -60,7 +61,7 @@ public class NWUDPSocket: NSObject {
         }
         timer.resume()
         
-        session.addObserver(self, forKeyPath: #keyPath(NWUDPSession.state), options: [.new], context: nil)
+        self.kvoController.observe(session, keyPath: #keyPath(NWUDPSession.state), options: [.new], context: nil)
         
         session.setReadHandler({ [ weak self ] dataArray, error in
             self?.queueCall {
