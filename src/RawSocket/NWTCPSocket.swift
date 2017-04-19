@@ -144,16 +144,18 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
             return
         }
         
-        connection!.readMinimumLength(1, maximumLength: Opt.MAXNWTCPSocketReadDataSize) { data, error in
-            guard error == nil else {
-                DDLogError("NWTCPSocket<\(self.session!.host):\(self.session!.port)> read failed: \(String(describing: error))")
-                self.queueCall {
-                    self.disconnect()
+        if let connection = self.connection {
+            connection.readMinimumLength(1, maximumLength: Opt.MAXNWTCPSocketReadDataSize) { data, error in
+                guard error == nil else {
+                    DDLogError("NWTCPSocket<\(String(describing: self.session?.host)):\(String(describing: self.session?.port))> read failed: \(String(describing: error))")
+                    self.queueCall {
+                        self.disconnect()
+                    }
+                    return
                 }
-                return
+                
+                self.readCallback(data: data)
             }
-            
-            self.readCallback(data: data)
         }
     }
     
@@ -168,16 +170,18 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
             return
         }
         
-        connection!.readLength(length) { data, error in
-            guard error == nil else {
-                DDLogError("NWTCPSocket<\(self.session!.host):\(self.session!.port)> read failed: \(String(describing: error))")
-                self.queueCall {
-                    self.disconnect()
+        if let connection = self.connection {
+            connection.readLength(length) { data, error in
+                guard error == nil else {
+                    DDLogError("NWTCPSocket<\(String(describing: self.session?.host)):\(String(describing: self.session?.port))> read failed: \(String(describing: error))")
+                    self.queueCall {
+                        self.disconnect()
+                    }
+                    return
                 }
-                return
+                
+                self.readCallback(data: data)
             }
-            
-            self.readCallback(data: data)
         }
     }
     
@@ -224,24 +228,27 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         
         if context == &NWTCPSocket.kKVOConnectionStatusContext && keyPath == "state" {
             
-            switch connection!.state {
-            case .connected:
-                queueCall {
-                    self.delegate?.didConnectWith(socket: self)
+            if let connection = self.connection {
+                switch connection.state {
+                case .connected:
+                    queueCall {
+                        self.delegate?.didConnectWith(socket: self)
+                    }
+                case .disconnected:
+                    cancelled = true
+                    cancel()
+                case .cancelled:
+                    cancelled = true
+                    queueCall {
+                        let delegate = self.delegate
+                        self.delegate = nil
+                        delegate?.didDisconnectWith(socket: self)
+                    }
+                default:
+                    break
                 }
-            case .disconnected:
-                cancelled = true
-                cancel()
-            case .cancelled:
-                cancelled = true
-                queueCall {
-                    let delegate = self.delegate
-                    self.delegate = nil
-                    delegate?.didDisconnectWith(socket: self)
-                }
-            default:
-                break
             }
+            
         }
         else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
@@ -284,20 +291,23 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
     
     private func send(data: Data) {
         writePending = true
-        self.connection!.write(data) { error in
-            self.queueCall {
-                self.writePending = false
-                
-                guard error == nil else {
-                    DDLogError("NWTCPSocket<\(self.session!.host):\(self.session!.port)> write failed: \(String(describing: error))")
-                    self.disconnect()
-                    return
+        if let connection = self.connection {
+            connection.write(data) { error in
+                self.queueCall {
+                    self.writePending = false
+                    
+                    guard error == nil else {
+                        DDLogError("NWTCPSocket<\(String(describing: self.session?.host)):\(String(describing: self.session?.port))> write failed: \(String(describing: error))")
+                        self.disconnect()
+                        return
+                    }
+                    
+                    self.delegate?.didWrite(data: data, by: self)
+                    self.checkStatus()
                 }
-                
-                self.delegate?.didWrite(data: data, by: self)
-                self.checkStatus()
             }
         }
+        
     }
     
     private func consumeReadData(_ data: Data?) -> Data? {
