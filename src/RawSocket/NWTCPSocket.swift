@@ -343,6 +343,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
             return
         }
         
-        connection.removeObserver(self, forKeyPath: "state")
+        connection.removeObserver(self, forKeyPath: "state", context: &NWTCPSocket.kKVOConnectionStatusContext)
+        self.connection = nil
     }
 }
