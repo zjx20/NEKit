@@ -159,8 +159,4 @@ public class NWUDPSocket: NSObject {
             block()
         }
     }
-    
-    deinit {
-        session.removeObserver(self, forKeyPath: #keyPath(NWUDPSession.state))
-    }
 }
