@@ -80,24 +80,20 @@ open class TUNInterface {
     }
     
     fileprivate func readPackets() {
-        let memory = self.checkMemory()
-        if memory < 9*1024*1024 {
-            packetFlow?.readPackets { packets, versions in
-                QueueFactory.getQueue().async {
-                    for (i, packet) in packets.enumerated() {
-                        for stack in self.stacks {
-                            if stack.input(packet: packet, version: versions[i]) {
-                                break
-                            }
+        _ = self.checkMemory()
+        
+        packetFlow?.readPackets { packets, versions in
+            QueueFactory.getQueue().async {
+                for (i, packet) in packets.enumerated() {
+                    for stack in self.stacks {
+                        if stack.input(packet: packet, version: versions[i]) {
+                            break
                         }
                     }
                 }
-                
-                self.readPackets()
             }
-        }
-        else {
-            DDLogDebug("Memory not enough!")
+            
+            self.readPackets()
         }
     }
     
