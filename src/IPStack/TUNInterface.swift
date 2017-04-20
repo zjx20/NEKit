@@ -1,5 +1,6 @@
 import Foundation
 import NetworkExtension
+import CocoaLumberjackSwift
 
 /// TUN interface provide a scheme to register a set of IP Stacks (implementing `IPStackProtocol`) to process IP packets from a virtual TUN interface.
 open class TUNInterface {
@@ -58,19 +59,45 @@ open class TUNInterface {
         }
     }
     
+    func checkMemory() -> UInt64 {
+        var taskInfo = mach_task_basic_info()
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
+        let kerr: kern_return_t = withUnsafeMutablePointer(to: &taskInfo) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
+                task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+            }
+        }
+        
+        if kerr == KERN_SUCCESS {
+            DDLogDebug("Memory used in bytes: \(taskInfo.resident_size)")
+            return taskInfo.resident_size
+        }
+        else {
+            DDLogDebug("Error with task_info(): " +
+                (String(cString: mach_error_string(kerr), encoding: String.Encoding.ascii) ?? "unknown error"))
+            return 0
+        }
+    }
+    
     fileprivate func readPackets() {
-        packetFlow?.readPackets { packets, versions in
-            QueueFactory.getQueue().async {
-                for (i, packet) in packets.enumerated() {
-                    for stack in self.stacks {
-                        if stack.input(packet: packet, version: versions[i]) {
-                            break
+        let memory = self.checkMemory()
+        if memory < 9*1024*1024 {
+            packetFlow?.readPackets { packets, versions in
+                QueueFactory.getQueue().async {
+                    for (i, packet) in packets.enumerated() {
+                        for stack in self.stacks {
+                            if stack.input(packet: packet, version: versions[i]) {
+                                break
+                            }
                         }
                     }
                 }
+                
+                self.readPackets()
             }
-            
-            self.readPackets()
+        }
+        else {
+            DDLogDebug("Memory not enough!")
         }
     }
     
