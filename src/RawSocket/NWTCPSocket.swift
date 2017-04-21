@@ -334,12 +334,4 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
             cancel()
         }
     }
-    
-    deinit {
-        guard let connection = connection else {
-            return
-        }
-        
-        self.connection = nil
-    }
 }
