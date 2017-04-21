@@ -18,7 +18,7 @@ public final class GCDHTTPProxyServer: GCDProxyServer {
      - parameter socket: The accepted socket.
      */
     override func handleNewGCDSocket(_ socket: GCDTCPSocket) {
-        let proxySocket = HTTPProxySocket(socket: socket)
+        let proxySocket = DirectProxySocket(socket: socket)
         didAcceptNewSocket(proxySocket)
     }
 }
