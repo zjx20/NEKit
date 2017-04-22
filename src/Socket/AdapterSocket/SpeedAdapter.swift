@@ -2,6 +2,9 @@ import Foundation
 
 /// This adpater selects the fastest proxy automatically from a set of proxies.
 public class SpeedAdapter: AdapterSocket, SocketDelegate {
+    
+    static var winnerHost:String?
+    
     public var adapters: [(AdapterSocket, Int)]!
     var connectingCount = 0
     var pendingCount = 0
@@ -22,17 +25,39 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
             didDisconnectWith(socket: self)
             return
         }
-
-        pendingCount = adapters.count
-        for (adapter, delay) in adapters {
-            QueueFactory.getQueue().asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.milliseconds(delay)) {
-                if self._shouldConnect {
-                    adapter.delegate = self
-                    adapter.openSocketWith(session: session)
-                    self.connectingCount += 1
+        
+        var winner:AdapterSocket?
+        if let winnerHost = SpeedAdapter.winnerHost {
+            
+            for (adapter, _) in adapters {
+                if let ssAdapter = adapter as? ShadowsocksAdapter, ssAdapter.host == winnerHost {
+                    winner = ssAdapter
+                    break
                 }
             }
         }
+        
+        if let winner = winner {
+            if self._shouldConnect {
+                winner.delegate = self
+                winner.openSocketWith(session: session)
+                self.connectingCount += 1
+            }
+        }
+        else {
+            pendingCount = adapters.count
+            
+            for (adapter, delay) in adapters {
+                QueueFactory.getQueue().asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.milliseconds(delay)) {
+                    if self._shouldConnect {
+                        adapter.delegate = self
+                        adapter.openSocketWith(session: session)
+                        self.connectingCount += 1
+                    }
+                }
+            }
+        }
+        
     }
 
     override public func disconnect(becauseOf error: Error? = nil) {
@@ -76,6 +101,10 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
                     adapter.forceDisconnect()
                 }
             }
+        }
+        
+        if let ssAdapter = adapterSocket as? ShadowsocksAdapter {
+            SpeedAdapter.winnerHost = ssAdapter.host
         }
 
         delegate?.updateAdapterWith(newAdapter: adapterSocket)
