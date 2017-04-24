@@ -20,7 +20,8 @@ public protocol NWUDPSocketDelegate: class {
 ///
 /// - note: This class is thread-safe.
 public class NWUDPSocket: NSObject {
-    private let session: NWUDPSession
+    private var session: NWUDPSession!
+    private var betterSession: NWUDPSession?
     private var pendingWriteData: [Data] = []
     private var writing = false
     private let queue: DispatchQueue = QueueFactory.getQueue()
@@ -62,6 +63,7 @@ public class NWUDPSocket: NSObject {
         timer.resume()
         
         self.kvoController.observe(session, keyPath: #keyPath(NWUDPSession.state), options: [.new], context: nil)
+        self.kvoController.observe(session, keyPath: #keyPath(NWUDPSession.hasBetterPath), options: [.new], context: nil)
         
         session.setReadHandler({ [ weak self ] dataArray, error in
             self?.queueCall {
@@ -99,21 +101,55 @@ public class NWUDPSocket: NSObject {
     }
     
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        guard keyPath == "state" else {
-            return
-        }
         
-        // http://inessential.com/2013/12/20/observers_and_thread_safety
         QueueFactory.getQueue().async { [weak self] in
             
-            if let strongSelf = self {
-                switch strongSelf.session.state {
-                case .cancelled:
-                    strongSelf.delegate?.didCancel(socket: strongSelf)
-                case .ready:
-                    strongSelf.checkWrite()
-                default:
-                    break
+            if let strongSelf = self, let changedSession = object as? NWUDPSession {
+                
+                if keyPath == #keyPath(NWUDPSession.state) {
+                    if changedSession == strongSelf.session {
+                        // The current session
+                        switch changedSession.state {
+                        case .cancelled, .failed:
+                            strongSelf.delegate?.didCancel(socket: strongSelf)
+                        case .ready:
+                            strongSelf.checkWrite()
+                        default:
+                            break
+                        }
+                    }
+                    else if changedSession == strongSelf.betterSession {
+                        // The upgraded session
+                        switch changedSession.state {
+                        case .cancelled, .failed:
+                            strongSelf.kvoController.unobserve(changedSession)
+                            strongSelf.betterSession = nil
+                            
+                        case .ready:
+                            strongSelf.kvoController.unobserve(strongSelf.session)
+                            strongSelf.session.cancel()
+                            strongSelf.session = changedSession
+                            strongSelf.betterSession = nil
+                        default:
+                            break
+                        }
+                    }
+                    
+                }
+                else if keyPath == #keyPath(NWUDPSession.hasBetterPath) {
+                 
+                    if changedSession.hasBetterPath {
+                        
+                        if let existedBetterSession = strongSelf.betterSession {
+                            strongSelf.kvoController.unobserve(existedBetterSession)
+                            existedBetterSession.cancel()
+                        }
+                        
+                        strongSelf.betterSession = NWUDPSession(upgradeFor: changedSession)
+                     
+                        strongSelf.kvoController.observe(strongSelf.betterSession, keyPath: #keyPath(NWUDPSession.state), options: [.new], context: nil)
+                        strongSelf.kvoController.observe(strongSelf.betterSession, keyPath: #keyPath(NWUDPSession.hasBetterPath), options: [.new], context: nil)
+                    }
                 }
             }
         }

@@ -8,7 +8,10 @@ import KVOController
 /// - warning: This class is not thread-safe.
 public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
     private static var kKVOConnectionStatusContext = 0
+    private static var kKVOConnectionHasBetterPath = 0
+    
     private var connection: NWTCPConnection?
+    private var betterConnection: NWTCPConnection?
     
     private var writePending = false
     private var closeAfterWriting = false
@@ -83,6 +86,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         
         self.connection = connection
         self.kvoController.observe(connection, keyPath: "state", options: [.initial, .new], context: &NWTCPSocket.kKVOConnectionStatusContext)
+        self.kvoController.observe(connection, keyPath: "hasBetterPath", options: [.new], context: &NWTCPSocket.kKVOConnectionHasBetterPath)
     }
     
     /**
@@ -229,24 +233,61 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         
         QueueFactory.getQueue().async {[weak self] in
             
-            if context == &NWTCPSocket.kKVOConnectionStatusContext && keyPath == "state" {
+            if let strongSelf = self, let changedConnection = object as? NWTCPConnection {
                 
-                if let strongSelf = self, let connection = strongSelf.connection {
-                    switch connection.state {
-                    case .connected:
-                        strongSelf.delegate?.didConnectWith(socket: strongSelf)
-                    case .disconnected:
-                        strongSelf.cancelled = true
-                        strongSelf.cancel()
-                    case .cancelled:
-                        strongSelf.cancelled = true
+                if context == &NWTCPSocket.kKVOConnectionStatusContext && keyPath == "state" {
+                    
+                    if changedConnection == strongSelf.connection {
+                        // The current connection
+                        switch changedConnection.state {
+                            
+                        case .connected:
+                            strongSelf.delegate?.didConnectWith(socket: strongSelf)
+                        case .disconnected:
+                            strongSelf.cancelled = true
+                            strongSelf.cancel()
+                        case .cancelled:
+                            strongSelf.cancelled = true
+                            
+                            let delegate = strongSelf.delegate
+                            strongSelf.delegate = nil
+                            delegate?.didDisconnectWith(socket: strongSelf)
+                            
+                        default:
+                            break
+                        }
+                    }
+                    else if changedConnection == strongSelf.betterConnection {
+                        // The upgraded connection
+                        switch changedConnection.state {
+                        case .connected:
+                            strongSelf.kvoController.unobserve(strongSelf.connection)
+                            strongSelf.connection?.cancel()
+                            strongSelf.connection = changedConnection
+                            strongSelf.betterConnection = nil
+                            
+                        case .disconnected, .cancelled:
+                            strongSelf.kvoController.unobserve(strongSelf.betterConnection)
+                            strongSelf.betterConnection = nil
+                            
+                        default:
+                            break
+                        }
+                    }
+                }
+                else if context == &NWTCPSocket.kKVOConnectionHasBetterPath && keyPath == "hasBetterPath" {
+                    
+                    if changedConnection.hasBetterPath {
                         
-                        let delegate = strongSelf.delegate
-                        strongSelf.delegate = nil
-                        delegate?.didDisconnectWith(socket: strongSelf)
+                        if let existedBetterConnection = strongSelf.betterConnection {
+                            strongSelf.kvoController.unobserve(existedBetterConnection)
+                            existedBetterConnection.cancel()
+                        }
                         
-                    default:
-                        break
+                        strongSelf.betterConnection = NWTCPConnection(upgradeFor: changedConnection)
+                        
+                        strongSelf.kvoController.observe(strongSelf.betterConnection, keyPath: "state", options: [.initial, .new], context: &NWTCPSocket.kKVOConnectionStatusContext)
+                        strongSelf.kvoController.observe(strongSelf.betterConnection, keyPath: "hasBetterPath", options: [.new], context: &NWTCPSocket.kKVOConnectionHasBetterPath)
                     }
                 }
             }
