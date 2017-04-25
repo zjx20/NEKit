@@ -174,18 +174,22 @@ open class IPPacket {
     var protocolParser: TransportProtocolParserProtocol!
 
     /// The data representing the packet.
-    var packetData: Data!
-
-    /**
-     Initailize a new instance to build IP packet.
-     */
-    init() {}
+    var packetData: Data
 
     /**
      Initailize an `IPPacket` with data.
      
      - parameter packetData: The data containing a whole packet.
      */
+    
+    init(sourceAddress: IPAddress, destinationAddress: IPAddress, transportProtocol: TransportProtocol, protocolParser: TransportProtocolParserProtocol) {
+        self.sourceAddress = sourceAddress
+        self.destinationAddress = destinationAddress
+        self.transportProtocol = transportProtocol
+        self.protocolParser = protocolParser
+        self.packetData = Data()
+    }
+    
     init?(packetData: Data) {
         // no need to validate the packet.
 

@@ -33,8 +33,13 @@ class UDPProtocolParser: TransportProtocolParserProtocol {
     var bytesLength: Int {
         return payload.count + 8
     }
-
-    init() {}
+    
+    init(sourcePort: Port, destinationPort: Port, payload: Data) {
+        self.sourcePort = sourcePort
+        self.destinationPort = destinationPort
+        self.payload = payload
+        self.packetData = Data()
+    }
 
     init?(packetData: Data, offset: Int) {
         guard packetData.count >= offset + 8 else {

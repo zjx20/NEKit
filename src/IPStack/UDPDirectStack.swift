@@ -138,15 +138,10 @@ public class UDPDirectStack: IPStackProtocol, NWUDPSocketDelegate {
             return
         }
 
-        let packet = IPPacket()
-        packet.sourceAddress = connectInfo.destinationAddress
-        packet.destinationAddress = connectInfo.sourceAddress
-        let udpParser = UDPProtocolParser()
-        udpParser.sourcePort = connectInfo.destinationPort
-        udpParser.destinationPort = connectInfo.sourcePort
-        udpParser.payload = data
-        packet.protocolParser = udpParser
-        packet.transportProtocol = .udp
+        let udpParser = UDPProtocolParser(sourcePort: connectInfo.destinationPort, destinationPort: connectInfo.sourcePort, payload: data)
+        
+        let packet = IPPacket(sourceAddress: connectInfo.destinationAddress, destinationAddress: connectInfo.sourceAddress, transportProtocol: .udp, protocolParser: udpParser)
+        
         packet.buildPacket()
 
         outputFunc([packet.packetData], [NSNumber(value: AF_INET as Int32)])

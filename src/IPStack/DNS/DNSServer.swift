@@ -158,38 +158,46 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
             return
         }
 
-        let udpParser = UDPProtocolParser()
-        udpParser.sourcePort = serverPort
-        // swiftlint:disable:next force_cast
-        udpParser.destinationPort = (session.requestIPPacket!.protocolParser as! UDPProtocolParser).sourcePort
-        switch result {
-        case .real:
-            udpParser.payload = session.realResponseMessage!.payload
-        case .fake:
-            let response = DNSMessage()
-            response.transactionID = session.requestMessage.transactionID
-            response.messageType = .response
-            response.recursionAvailable = true
-            // since we only support ipv4 as of now, it must be an answer of type A
-            response.answers.append(DNSResource.ARecord(session.requestMessage.queries[0].name, TTL: UInt32(Opt.DNSFakeIPTTL), address: session.fakeIP!))
-            session.expireAt = Date().addingTimeInterval(Double(Opt.DNSFakeIPTTL))
-            guard response.buildMessage() else {
-                DDLogError("Failed to build DNS response.")
+        if let destinationPort = (session.requestIPPacket?.protocolParser as? UDPProtocolParser)?.sourcePort {
+            
+            var payload:Data?
+            
+            switch result {
+            case .real:
+                if let realPayload = session.realResponseMessage?.payload {
+                    payload = realPayload
+                }
+            case .fake:
+                let response = DNSMessage()
+                response.transactionID = session.requestMessage.transactionID
+                response.messageType = .response
+                response.recursionAvailable = true
+                // since we only support ipv4 as of now, it must be an answer of type A
+                response.answers.append(DNSResource.ARecord(session.requestMessage.queries[0].name, TTL: UInt32(Opt.DNSFakeIPTTL), address: session.fakeIP!))
+                session.expireAt = Date().addingTimeInterval(Double(Opt.DNSFakeIPTTL))
+                guard response.buildMessage() else {
+                    DDLogError("Failed to build DNS response.")
+                    return
+                }
+                
+                payload = response.payload
+            default:
                 return
             }
-
-            udpParser.payload = response.payload
-        default:
-            return
+            
+            if let payload = payload {
+                
+                let udpParser = UDPProtocolParser(sourcePort: serverPort, destinationPort: destinationPort, payload: payload)
+                
+                if let destinationAddress = session.requestIPPacket?.sourceAddress {
+                    let ipPacket = IPPacket(sourceAddress: serverAddress, destinationAddress: destinationAddress, transportProtocol: .udp, protocolParser: udpParser)
+                    
+                    ipPacket.buildPacket()
+                    
+                    outputFunc([ipPacket.packetData], [NSNumber(value: AF_INET as Int32)])
+                }
+            }
         }
-        let ipPacket = IPPacket()
-        ipPacket.sourceAddress = serverAddress
-        ipPacket.destinationAddress = session.requestIPPacket!.sourceAddress
-        ipPacket.protocolParser = udpParser
-        ipPacket.transportProtocol = .udp
-        ipPacket.buildPacket()
-
-        outputFunc([ipPacket.packetData], [NSNumber(value: AF_INET as Int32)])
     }
 
     fileprivate func shouldMatch(_ session: DNSSession) -> Bool {
