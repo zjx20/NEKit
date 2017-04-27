@@ -86,23 +86,43 @@ open class DNSMessage {
             let addtionalCount = try scanner.read16()
             
             for _ in 0..<queryCount {
-                queries.append(DNSQuery(payload: payload, offset: scanner.position, base: 0)!)
-                scanner.advance(by: queries.last!.bytesLength)
+                if let query = DNSQuery(payload: payload, offset: scanner.position, base: 0) {
+                    queries.append(query)
+                    scanner.advance(by: queries.last!.bytesLength)
+                }
+                else {
+                    return nil
+                }
             }
             
             for _ in 0..<answerCount {
-                answers.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
-                scanner.advance(by: answers.last!.bytesLength)
+                if let resource = DNSResource(payload: payload, offset: scanner.position, base: 0) {
+                    answers.append(resource)
+                    scanner.advance(by: answers.last!.bytesLength)
+                }
+                else {
+                    return nil
+                }
             }
             
             for _ in 0..<nameserverCount {
-                nameservers.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
-                scanner.advance(by: nameservers.last!.bytesLength)
+                if let resource = DNSResource(payload: payload, offset: scanner.position, base: 0) {
+                    nameservers.append(resource)
+                    scanner.advance(by: nameservers.last!.bytesLength)
+                }
+                else {
+                    return nil
+                }
             }
             
             for _ in 0..<addtionalCount {
-                addtionals.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
-                scanner.advance(by: addtionals.last!.bytesLength)
+                if let resource = DNSResource(payload: payload, offset: scanner.position, base: 0) {
+                    addtionals.append(resource)
+                    scanner.advance(by: addtionals.last!.bytesLength)
+                }
+                else {
+                    return nil
+                }
             }
         } catch _ {
             return nil
