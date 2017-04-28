@@ -28,7 +28,7 @@ open class DNSSession {
     }
 
     convenience init?(packet: IPPacket) {
-        guard let payload = packet.protocolParser?.payload, let message = DNSMessage(payload: payload) else {
+        guard let parser = packet.protocolParser, let payload = parser.payload, let message = DNSMessage(payload: payload) else {
             return nil
         }
         self.init(message: message)
