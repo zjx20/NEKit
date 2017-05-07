@@ -5,7 +5,6 @@ public class HTTPProxySocket: ProxySocket {
         case invalid,
         readingFirstHeader,
         pendingFirstHeader,
-        readingHeader,
         readingContent,
         stopped
         
@@ -17,8 +16,6 @@ public class HTTPProxySocket: ProxySocket {
                 return "reading first header"
             case .pendingFirstHeader:
                 return "waiting to send first header"
-            case .readingHeader:
-                return "reading header (forwarding)"
             case .readingContent:
                 return "reading content (forwarding)"
             case .stopped:
@@ -101,21 +98,12 @@ public class HTTPProxySocket: ProxySocket {
         }
         
         switch scanner.nextAction {
-        case .readContent(let length):
-            readStatus = .readingContent
-            if length > 0 {
-                socket.readDataTo(length: length)
-            } else {
-                socket.readData()
-            }
-        case .readHeader:
-            readStatus = .readingHeader
-            socket.readDataTo(data: Utils.HTTPData.DoubleCRLF)
-        case .stop:
+        case .readContent:
+            socket.readData()
+        default:
             readStatus = .stopped
             disconnect()
         }
-        
     }
     
     // swiftlint:disable function_body_length
@@ -141,6 +129,7 @@ public class HTTPProxySocket: ProxySocket {
         case (.readingFirstHeader, .header(let header)):
             currentHeader = header
             if let currentHeader = self.currentHeader {
+                
                 currentHeader.removeProxyHeader()
                 currentHeader.rewriteToRelativePath()
                 
@@ -167,18 +156,6 @@ public class HTTPProxySocket: ProxySocket {
                 else {
                     disconnect()
                 }
-            }
-            else {
-                disconnect()
-            }
-        case (.readingHeader, .header(let header)):
-            currentHeader = header
-            
-            if let currentHeader = self.currentHeader {
-                currentHeader.removeProxyHeader()
-                currentHeader.rewriteToRelativePath()
-                
-                delegate?.didRead(data: currentHeader.toData(), from: self)
             }
             else {
                 disconnect()

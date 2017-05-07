@@ -15,7 +15,7 @@ open class HTTPHeader {
     open var port: Int
     // just assume that `Content-Length` is given as of now.
     // Chunk is not supported yet.
-    open var contentLength: Int = 0
+    
     open var headers: [(String, String)] = []
     open var rawHeader: Data?
 
@@ -55,7 +55,6 @@ open class HTTPHeader {
             }
             self.port = port
 
-            self.contentLength = 0
         } else {
             var resolved = false
 
@@ -106,16 +105,6 @@ open class HTTPHeader {
                 } else {
                     host = urlInfo[0]
                     port = 80
-                }
-            }
-
-            for (key, value) in headers {
-                if "Content-Length".caseInsensitiveCompare(key) == .orderedSame {
-                    guard let contentLength = Int(value) else {
-                        throw HTTPHeaderError.invalidContentLength
-                    }
-                    self.contentLength = contentLength
-                    break
                 }
             }
         }

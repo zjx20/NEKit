@@ -1,5 +1,4 @@
 import Foundation
-import Yaml
 import SwiftyJSON
 
 public enum ConfigurationParserError: Error {
@@ -36,8 +35,3 @@ open class Configuration {
 
 }
 
-extension Yaml {
-    var stringOrIntString: Swift.String? {
-        return string ?? int?.description
-    }
-}

@@ -4,6 +4,16 @@ import Foundation
 public class SpeedAdapter: AdapterSocket, SocketDelegate {
     
     static var winnerHost:String?
+    static let winnerRefresher:Int = {
+        SpeedAdapter.refreshWinner()
+        return 0
+    }()
+    static func refreshWinner() {
+        QueueFactory.queue.asyncAfter(deadline: .now()+5) {
+            SpeedAdapter.winnerHost = nil
+            SpeedAdapter.refreshWinner()
+        }
+    }
     
     public var adapters: [(AdapterSocket, Int)]!
     var connectingCount = 0
@@ -12,6 +22,9 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
     fileprivate var _shouldConnect: Bool = true
 
     override public func openSocketWith(session: ConnectSession) {
+        
+        _ = SpeedAdapter.winnerRefresher
+        
         for (adapter, _) in adapters {
             adapter.observer = nil
         }
@@ -104,6 +117,11 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
         }
         
         if let ssAdapter = adapterSocket as? ShadowsocksAdapter {
+            
+            if SpeedAdapter.winnerHost == nil {
+                NotificationCenter.default.post(name: Notification.Name.init("DidFindFastestServer"), object: ssAdapter.host)
+            }
+            
             SpeedAdapter.winnerHost = ssAdapter.host
         }
 
