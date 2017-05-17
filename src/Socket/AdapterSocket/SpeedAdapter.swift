@@ -18,6 +18,8 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
     public var adapters: [(AdapterSocket, Int)]!
     var connectingCount = 0
     var pendingCount = 0
+    
+    var beginDate:Date?
 
     fileprivate var _shouldConnect: Bool = true
 
@@ -49,6 +51,8 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
                 }
             }
         }
+        
+        self.beginDate = Date()
         
         if let winner = winner {
             if self._shouldConnect {
@@ -116,13 +120,24 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
             }
         }
         
-        if let ssAdapter = adapterSocket as? ShadowsocksAdapter {
+        var latency:Double = 0
+        
+        if let beginDate = self.beginDate {
+            latency = Date().timeIntervalSince(beginDate)
+        }
+        
+        // We only have ss
+        let ssAdapter = adapterSocket as! ShadowsocksAdapter
             
-            if SpeedAdapter.winnerHost == nil {
-                NotificationCenter.default.post(name: Notification.Name.init("DidFindFastestServer"), object: ssAdapter.host)
-            }
+        if SpeedAdapter.winnerHost != ssAdapter.host {
+            NotificationCenter.default.post(name: Notification.Name.init("DidFindFastestServer"), object: nil, userInfo: ["host":ssAdapter.host, "latency":latency])
             
             SpeedAdapter.winnerHost = ssAdapter.host
+        }
+        
+        if latency >= 1.0 {
+            // Need to find a better server
+            SpeedAdapter.winnerHost = nil
         }
 
         delegate?.updateAdapterWith(newAdapter: adapterSocket)
