@@ -150,14 +150,26 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         }
         
         if let connection = self.connection {
+            
+            let startDate = Date()
+            
             connection.readMinimumLength(1, maximumLength: Opt.MAXNWTCPSocketReadDataSize) { data, error in
                 guard error == nil else {
+                    
                     DDLogError("NWTCPSocket<\(String(describing: self.session?.host)):\(String(describing: self.session?.port))> read failed: \(String(describing: error))")
                     self.queueCall {
                         self.disconnect()
                     }
                     return
                 }
+                
+                let duration = Date().timeIntervalSince(startDate)
+                if let host = (self.connection?.endpoint as? NWHostEndpoint)?.hostname, let bytes = data?.count {
+                    NotificationCenter.default.post(name: Notification.Name.init("DataDidDownload"), object: nil, userInfo: ["host":host,
+                                                                                                                             "bytes":bytes,
+                                                                                                                             "duration":duration])
+                }
+                
                 
                 self.readCallback(data: data)
             }
@@ -176,6 +188,9 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         }
         
         if let connection = self.connection {
+            
+            let startDate = Date()
+            
             connection.readLength(length) { data, error in
                 guard error == nil else {
                     DDLogError("NWTCPSocket<\(String(describing: self.session?.host)):\(String(describing: self.session?.port))> read failed: \(String(describing: error))")
@@ -183,6 +198,13 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
                         self.disconnect()
                     }
                     return
+                }
+                
+                let duration = Date().timeIntervalSince(startDate)
+                if let host = (self.connection?.endpoint as? NWHostEndpoint)?.hostname, let bytes = data?.count {
+                    NotificationCenter.default.post(name: Notification.Name.init("DataDidDownload"), object: nil, userInfo: ["host":host,
+                                                                                                                             "bytes":bytes,
+                                                                                                                             "duration":duration])
                 }
                 
                 self.readCallback(data: data)
@@ -330,6 +352,9 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
     private func send(data: Data) {
         writePending = true
         if let connection = self.connection {
+            
+            let startDate = Date()
+            
             connection.write(data) { error in
                 self.queueCall {
                     self.writePending = false
@@ -338,6 +363,13 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
                         DDLogError("NWTCPSocket<\(String(describing: self.session?.host)):\(String(describing: self.session?.port))> write failed: \(String(describing: error))")
                         self.disconnect()
                         return
+                    }
+                    
+                    let duration = Date().timeIntervalSince(startDate)
+                    if let host = (self.connection?.endpoint as? NWHostEndpoint)?.hostname {
+                        NotificationCenter.default.post(name: Notification.Name.init("DataDidUpload"), object: nil, userInfo: ["host":host,
+                                                                                                                                 "bytes":data.count,
+                                                                                                                                 "duration":duration])
                     }
                     
                     self.delegate?.didWrite(data: data, by: self)
