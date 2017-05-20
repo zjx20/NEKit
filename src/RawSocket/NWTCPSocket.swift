@@ -151,7 +151,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         
         if let connection = self.connection {
             
-            let startDate = Date()
+            let startTime = CACurrentMediaTime()
             
             connection.readMinimumLength(1, maximumLength: Opt.MAXNWTCPSocketReadDataSize) { data, error in
                 guard error == nil else {
@@ -163,7 +163,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
                     return
                 }
                 
-                let duration = Date().timeIntervalSince(startDate)
+                let duration = CACurrentMediaTime() - startTime
                 if let host = (self.connection?.endpoint as? NWHostEndpoint)?.hostname, let bytes = data?.count {
                     NotificationCenter.default.post(name: Notification.Name.init("DataDidDownload"), object: nil, userInfo: ["host":host,
                                                                                                                              "bytes":bytes,
@@ -189,7 +189,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         
         if let connection = self.connection {
             
-            let startDate = Date()
+            let startTime = CACurrentMediaTime()
             
             connection.readLength(length) { data, error in
                 guard error == nil else {
@@ -200,7 +200,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
                     return
                 }
                 
-                let duration = Date().timeIntervalSince(startDate)
+                let duration = CACurrentMediaTime() - startTime
                 if let host = (self.connection?.endpoint as? NWHostEndpoint)?.hostname, let bytes = data?.count {
                     NotificationCenter.default.post(name: Notification.Name.init("DataDidDownload"), object: nil, userInfo: ["host":host,
                                                                                                                              "bytes":bytes,
@@ -353,7 +353,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
         writePending = true
         if let connection = self.connection {
             
-            let startDate = Date()
+            let startTime = CACurrentMediaTime()
             
             connection.write(data) { error in
                 self.queueCall {
@@ -365,7 +365,7 @@ public class NWTCPSocket: NSObject, RawTCPSocketProtocol {
                         return
                     }
                     
-                    let duration = Date().timeIntervalSince(startDate)
+                    let duration = CACurrentMediaTime() - startTime
                     if let host = (self.connection?.endpoint as? NWHostEndpoint)?.hostname {
                         NotificationCenter.default.post(name: Notification.Name.init("DataDidUpload"), object: nil, userInfo: ["host":host,
                                                                                                                                  "bytes":data.count,

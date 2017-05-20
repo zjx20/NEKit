@@ -1,4 +1,5 @@
 import Foundation
+import QuartzCore
 
 /// This adpater selects the fastest proxy automatically from a set of proxies.
 public class SpeedAdapter: AdapterSocket, SocketDelegate {
@@ -19,9 +20,7 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
     var connectingCount = 0
     var pendingCount = 0
     
-    var beginDate:Date?
-
-    fileprivate var _shouldConnect: Bool = true
+    var startTime:CFTimeInterval?
 
     override public func openSocketWith(session: ConnectSession) {
         
@@ -52,26 +51,22 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
             }
         }
         
-        self.beginDate = Date()
+        self.startTime = CACurrentMediaTime()
         
         if let winner = winner {
-            if self._shouldConnect {
-                winner.delegate = self
-                winner.openSocketWith(session: session)
-                self.connectingCount += 1
-            }
+            
+            winner.delegate = self
+            winner.openSocketWith(session: session)
+            self.connectingCount += 1
         }
         else {
             pendingCount = adapters.count
             
-            for (adapter, delay) in adapters {
-                QueueFactory.getQueue().asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.milliseconds(delay)) {
-                    if self._shouldConnect {
-                        adapter.delegate = self
-                        adapter.openSocketWith(session: session)
-                        self.connectingCount += 1
-                    }
-                }
+            for (adapter, _) in adapters {
+                
+                adapter.delegate = self
+                adapter.openSocketWith(session: session)
+                self.connectingCount += 1
             }
         }
         
@@ -80,7 +75,7 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
     override public func disconnect(becauseOf error: Error? = nil) {
         super.disconnect(becauseOf: error)
 
-        _shouldConnect = false
+        
         pendingCount = 0
         for (adapter, _) in adapters {
             adapter.delegate = nil
@@ -92,8 +87,7 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
 
     override public func forceDisconnect(becauseOf error: Error? = nil) {
         super.forceDisconnect(becauseOf: error)
-
-        _shouldConnect = false
+        
         pendingCount = 0
         for (adapter, _) in adapters {
             adapter.delegate = nil
@@ -108,8 +102,6 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
             return
         }
 
-        _shouldConnect = false
-
         // first we disconnect all other adapter now, and set delegate to nil
         for (adapter, _) in adapters {
             if adapter != adapterSocket {
@@ -122,8 +114,8 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
         
         var latency:Double = 0
         
-        if let beginDate = self.beginDate {
-            latency = Date().timeIntervalSince(beginDate)
+        if let startTime = self.startTime {
+            latency = CACurrentMediaTime() - startTime
         }
         
         // We only have ss
