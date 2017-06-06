@@ -51,6 +51,7 @@ public class ShadowsocksAdapter: AdapterSocket {
         do {
             internalStatus = .connecting
             socket.session = session
+            NotificationCenter.default.post(name: Notification.Name.init("DidTryConnectToHost"), object: session.host)
             try socket.connectTo(host: host, port: port, enableTLS: false, tlsSettings: nil)
         } catch let error {
             observer?.signal(.errorOccured(error, on: self))
