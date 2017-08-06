@@ -257,7 +257,16 @@ open class IPPacket {
     }
 
     func computePseudoHeaderChecksum() -> UInt32 {
-        return 0
+        var result: UInt32 = 0
+        if let address = sourceAddress {
+            result += address.UInt32InNetworkOrder! >> 16 + address.UInt32InNetworkOrder! & 0xFFFF
+        }
+        if let address = destinationAddress {
+            result += address.UInt32InNetworkOrder! >> 16 + address.UInt32InNetworkOrder! & 0xFFFF
+        }
+        result += UInt32(transportProtocol.rawValue) << 8
+        result += CFSwapInt32(UInt32(protocolParser.bytesLength))
+        return result
     }
 
     func buildPacket() {
