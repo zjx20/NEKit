@@ -1,6 +1,6 @@
 import Foundation
 
-class QueueFactory {
+public class QueueFactory {
     private static let queueKey = DispatchSpecificKey<String>()
 
     static let queue: DispatchQueue = {
@@ -9,7 +9,7 @@ class QueueFactory {
         return q
     }()
 
-    static func getQueue() -> DispatchQueue {
+    public static func getQueue() -> DispatchQueue {
         return QueueFactory.queue
     }
 
